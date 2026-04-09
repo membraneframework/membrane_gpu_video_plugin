@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  rust_lint:
+    runs-on: ubuntu-latest
+    container:
+      image: rust:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install rustfmt and clippy
+        run: rustup component add rustfmt clippy
+      - name: Check formatting
+        run: cargo fmt --check
+      - name: Run clippy
+        run: cargo clippy -- -D warnings
+
+  build_test:
+    uses: membraneframework/membrane_actions/.github/workflows/build-test.yml@main
+
+  test:
+    uses: membraneframework/membrane_actions/.github/workflows/test.yml@main
+
+  lint:
+    uses: membraneframework/membrane_actions/.github/workflows/lint.yml@main
+
+  hex_publish:
+    needs: [rust_lint, build_test, test, lint]
+    uses: membraneframework/membrane_actions/.github/workflows/hex-publish.yml@main
+    secrets:
+      HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
