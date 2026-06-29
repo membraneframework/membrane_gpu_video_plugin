@@ -45,7 +45,7 @@ defmodule Membrane.VKVideo.Mixfile do
       {:membrane_h26x_plugin, "~> 0.10.5", only: :test},
       {:membrane_file_plugin, "~> 0.17.2", only: :test},
       {:rustler, "~> 0.37.1"},
-      {:ex_doc, "~> 0.40", only: :dev, runtime: false},
+      {:ex_doc, ">= 0.40.0", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: :dev, runtime: false}
     ]
