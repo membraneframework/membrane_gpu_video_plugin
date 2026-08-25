@@ -21,7 +21,7 @@ defmodule Decoder.Test do
             |> child(:parser, %Membrane.H264.Parser{
               generate_best_effort_timestamps: %{framerate: {@framerate_numerator, 1}}
             })
-            |> child(:decoder, Membrane.VKVideo.Decoder)
+            |> child(:decoder, Membrane.GPUVideo.Decoder)
             |> child(:sink, Sink)
         )
 
@@ -57,7 +57,7 @@ defmodule Decoder.Test do
             |> child(:parser, %Membrane.H264.Parser{
               generate_best_effort_timestamps: %{framerate: {@framerate_numerator, 1}}
             })
-            |> child(:decoder, Membrane.VKVideo.Decoder)
+            |> child(:decoder, Membrane.GPUVideo.Decoder)
             |> child(:sink, %Membrane.File.Sink{location: out_path})
         )
 

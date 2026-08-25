@@ -4,7 +4,7 @@ defmodule Transcoder.Test do
   import Membrane.Testing.Assertions
   require Membrane.Pad, as: Pad
   alias Membrane.Testing.{Pipeline, Sink}
-  alias Membrane.VKVideo.Transcoder
+  alias Membrane.GPUVideo.Transcoder
 
   @take_refs_snapshot System.get_env("TAKE_TEST_REFERENCES_SNAPSHOT", "") != ""
 

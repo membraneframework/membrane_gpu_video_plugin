@@ -1,6 +1,6 @@
 defmodule Encoder.NativeTest do
   use ExUnit.Case, async: false
-  alias Membrane.VKVideo.{DeviceServer, Native}
+  alias Membrane.GPUVideo.{DeviceServer, Native}
 
   @take_refs_snapshot System.get_env("TAKE_TEST_REFERENCES_SNAPSHOT", "") != ""
 
@@ -15,12 +15,12 @@ defmodule Encoder.NativeTest do
         :encoder_default,
         :disabled,
         {:constant_bitrate,
-         %Membrane.VKVideo.Encoder.ConstantBitrate{
+         %Membrane.GPUVideo.Encoder.ConstantBitrate{
            virtual_buffer_size_ms: 2000,
            bitrate: 8000
          }},
         {:variable_bitrate,
-         %Membrane.VKVideo.Encoder.VariableBitrate{
+         %Membrane.GPUVideo.Encoder.VariableBitrate{
            virtual_buffer_size_ms: 2000,
            average_bitrate: 2000,
            max_bitrate: 4000

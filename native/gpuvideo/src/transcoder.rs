@@ -14,7 +14,7 @@ pub struct TranscoderResource {
 }
 
 #[derive(NifStruct, Clone, Copy)]
-#[module = "Membrane.VKVideo.Transcoder.OutputSpec"]
+#[module = "Membrane.GPUVideo.Transcoder.OutputSpec"]
 pub struct OutputSpec {
     pub width: u32,
     pub height: u32,

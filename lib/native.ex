@@ -1,6 +1,6 @@
-defmodule Membrane.VKVideo.Native do
+defmodule Membrane.GPUVideo.Native do
   @moduledoc false
-  use Rustler, otp_app: :membrane_vk_video_plugin, crate: :vkvideo
+  use Rustler, otp_app: :membrane_gpu_video_plugin, crate: :gpuvideo
 
   @type t :: reference()
   @type raw_frame :: %{
@@ -37,8 +37,8 @@ defmodule Membrane.VKVideo.Native do
           :low_latency | :high_quality,
           :encoder_default
           | :disabled
-          | {:variable_bitrate, Membrane.VKVideo.Encoder.VariableBitrate.t()}
-          | {:constant_bitrate, Membrane.VKVideo.Encoder.ConstantBitrate.t()}
+          | {:variable_bitrate, Membrane.GPUVideo.Encoder.VariableBitrate.t()}
+          | {:constant_bitrate, Membrane.GPUVideo.Encoder.ConstantBitrate.t()}
         ) :: t() | no_return()
   def new_encoder(_device, _width, _height, _framerate, _tune, _rate_control),
     do: :erlang.nif_error(:nif_not_loaded)
@@ -52,7 +52,7 @@ defmodule Membrane.VKVideo.Native do
 
   @spec new_transcoder(
           t(),
-          [Membrane.VKVideo.Transcoder.OutputSpec.t()],
+          [Membrane.GPUVideo.Transcoder.OutputSpec.t()],
           {non_neg_integer(), pos_integer()}
         ) ::
           t() | no_return()

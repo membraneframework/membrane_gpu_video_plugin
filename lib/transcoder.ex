@@ -1,4 +1,4 @@
-defmodule Membrane.VKVideo.Transcoder do
+defmodule Membrane.GPUVideo.Transcoder do
   @moduledoc """
   H.264 hardware transcoder using Vulkan Video extensions.
 
@@ -16,7 +16,7 @@ defmodule Membrane.VKVideo.Transcoder do
       spec = [
         child(:source, source)
         |> child(:parser, %Membrane.H264.Parser{...})
-        |> child(:transcoder, Membrane.VKVideo.Transcoder),
+        |> child(:transcoder, Membrane.GPUVideo.Transcoder),
         get_child(:transcoder)
         |> via_out(Pad.ref(:output, 0), options: [width: 1280, height: 720])
         |> child(:sink_hd, sink_hd),
@@ -27,7 +27,7 @@ defmodule Membrane.VKVideo.Transcoder do
   """
 
   use Membrane.Filter
-  alias Membrane.VKVideo.{DeviceServer, Native, Transcoder.OutputSpec}
+  alias Membrane.GPUVideo.{DeviceServer, Native, Transcoder.OutputSpec}
 
   def_options approx_framerate: [
                 spec: {non_neg_integer(), pos_integer()} | nil,
@@ -66,11 +66,11 @@ defmodule Membrane.VKVideo.Transcoder do
         spec:
           :encoder_default
           | :disabled
-          | {:variable_bitrate, Membrane.VKVideo.Encoder.VariableBitrate.t()}
-          | {:constant_bitrate, Membrane.VKVideo.Encoder.ConstantBitrate.t()},
+          | {:variable_bitrate, Membrane.GPUVideo.Encoder.VariableBitrate.t()}
+          | {:constant_bitrate, Membrane.GPUVideo.Encoder.ConstantBitrate.t()},
         default: :encoder_default,
         description: """
-        Rate control mode for the output stream. See `Membrane.VKVideo.Encoder` for
+        Rate control mode for the output stream. See `Membrane.GPUVideo.Encoder` for
         available options.
         """
       ],

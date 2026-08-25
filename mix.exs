@@ -1,12 +1,12 @@
-defmodule Membrane.VKVideo.Mixfile do
+defmodule Membrane.GPUVideo.Mixfile do
   use Mix.Project
 
   @version "0.2.1"
-  @github_url "https://github.com/membraneframework/membrane_vk_video_plugin"
+  @github_url "https://github.com/membraneframework/membrane_gpu_video_plugin"
 
   def project do
     [
-      app: :membrane_vk_video_plugin,
+      app: :membrane_gpu_video_plugin,
       version: @version,
       elixir: "~> 1.13",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -15,11 +15,11 @@ defmodule Membrane.VKVideo.Mixfile do
       dialyzer: dialyzer(),
 
       # hex
-      description: "vk video plugin for Membrane Framework",
+      description: "GPU video plugin for Membrane Framework",
       package: package(),
 
       # docs
-      name: "Membrane vk video plugin",
+      name: "Membrane GPU video plugin",
       source_url: @github_url,
       docs: docs(),
       homepage_url: "https://membrane.stream"
@@ -29,7 +29,7 @@ defmodule Membrane.VKVideo.Mixfile do
   def application do
     [
       extra_applications: [],
-      mod: {Membrane.VKVideo, []}
+      mod: {Membrane.GPUVideo, []}
     ]
   end
 
@@ -81,7 +81,7 @@ defmodule Membrane.VKVideo.Mixfile do
       extras: ["README.md", "LICENSE"],
       formatters: ["html"],
       source_ref: "v#{@version}",
-      nest_modules_by_prefix: [Membrane.VKVideo]
+      nest_modules_by_prefix: [Membrane.GPUVideo]
     ]
   end
 end

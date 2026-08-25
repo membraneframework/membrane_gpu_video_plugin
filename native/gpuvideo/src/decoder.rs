@@ -8,7 +8,7 @@ pub struct DecoderResource {
 }
 
 #[derive(NifStruct)]
-#[module = "Membrane.VKVideo.RawFrame"]
+#[module = "Membrane.GPUVideo.RawFrame"]
 pub struct RawFrame<'a> {
     pub payload: Binary<'a>,
     pub pts_ns: Option<u64>,

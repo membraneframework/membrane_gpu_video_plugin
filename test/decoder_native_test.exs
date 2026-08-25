@@ -1,6 +1,6 @@
 defmodule Decoder.NativeTest do
   use ExUnit.Case, async: false
-  alias Membrane.VKVideo.{DeviceServer, Native}
+  alias Membrane.GPUVideo.{DeviceServer, Native}
 
   @tag :requires_gpu
   test "Decoder decodes H.264 stream" do

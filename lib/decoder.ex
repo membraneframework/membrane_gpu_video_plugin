@@ -1,11 +1,11 @@
-defmodule Membrane.VKVideo.Decoder do
+defmodule Membrane.GPUVideo.Decoder do
   @moduledoc """
   Decoder of H.264 stream taking advantage of hardware acceleration provided
   by Vulkan video extensions.
   """
   use Membrane.Filter
 
-  alias Membrane.VKVideo.{DeviceServer, Native}
+  alias Membrane.GPUVideo.{DeviceServer, Native}
 
   def_input_pad :input, accepted_format: %Membrane.H264{stream_structure: :annexb, alignment: :au}
   def_output_pad :output, accepted_format: %Membrane.RawVideo{pixel_format: :NV12}

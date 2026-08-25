@@ -1,4 +1,4 @@
-defmodule Membrane.VKVideo.Encoder do
+defmodule Membrane.GPUVideo.Encoder do
   @moduledoc """
   H.264 encoder taking advantage of hardware acceleration provided
   by Vulkan video extensions.
@@ -7,7 +7,7 @@ defmodule Membrane.VKVideo.Encoder do
 
   require Membrane.Logger
 
-  alias Membrane.VKVideo.{DeviceServer, Native}
+  alias Membrane.GPUVideo.{DeviceServer, Native}
 
   def_input_pad :input, accepted_format: %Membrane.RawVideo{pixel_format: :NV12}
 

@@ -60,7 +60,7 @@ impl Resource {
 }
 
 #[derive(rustler::NifStruct)]
-#[module = "Membrane.VKVideo.EncodedFrame"]
+#[module = "Membrane.GPUVideo.EncodedFrame"]
 pub struct EncodedFrame<'a> {
     pub payload: Binary<'a>,
     pub pts_ns: Option<u64>,
@@ -178,4 +178,4 @@ pub fn flush_transcoder<'a>(
     transcoder::flush(env, resource)
 }
 
-rustler::init!("Elixir.Membrane.VKVideo.Native", load = load);
+rustler::init!("Elixir.Membrane.GPUVideo.Native", load = load);

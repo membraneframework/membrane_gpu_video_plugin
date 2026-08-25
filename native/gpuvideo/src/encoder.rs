@@ -18,7 +18,7 @@ pub enum EncoderTune {
 }
 
 #[derive(NifStruct, Clone, Copy)]
-#[module = "Membrane.VKVideo.Encoder.VariableBitrate"]
+#[module = "Membrane.GPUVideo.Encoder.VariableBitrate"]
 pub struct VariableBitrate {
     pub average_bitrate: u64,
     pub max_bitrate: u64,
@@ -26,7 +26,7 @@ pub struct VariableBitrate {
 }
 
 #[derive(NifStruct, Clone, Copy)]
-#[module = "Membrane.VKVideo.Encoder.ConstantBitrate"]
+#[module = "Membrane.GPUVideo.Encoder.ConstantBitrate"]
 pub struct ConstantBitrate {
     pub bitrate: u64,
     pub virtual_buffer_size_ms: u64,

@@ -1,4 +1,4 @@
-defmodule Membrane.VKVideo.Encoder.VariableBitrate do
+defmodule Membrane.GPUVideo.Encoder.VariableBitrate do
   @moduledoc """
   Defines encoder setting for variable bitrate rate control algorithm.
 

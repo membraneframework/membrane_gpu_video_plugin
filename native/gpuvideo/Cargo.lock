@@ -149,6 +149,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "795cbfc56d419a7ce47ccbb7504dd9a5b7c484c083c356e797de08bd988d9629"
 
 [[package]]
+name = "gpuvideo"
+version = "0.1.0"
+dependencies = [
+ "rustler",
+ "vk-video",
+]
+
+[[package]]
 name = "h264-reader"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -531,7 +539,7 @@ dependencies = [
 [[package]]
 name = "vk-video"
 version = "0.2.1"
-source = "git+https://github.com/software-mansion/smelter.git#2f60dd3dd47fe583005eac2b0e393b5b5c8efd0b"
+source = "git+https://github.com/software-mansion/smelter.git?rev=2f60dd3dd47fe583005eac2b0e393b5b5c8efd0b#2f60dd3dd47fe583005eac2b0e393b5b5c8efd0b"
 dependencies = [
  "ash",
  "bytemuck",
@@ -545,14 +553,6 @@ dependencies = [
  "thiserror 1.0.69",
  "tracing",
  "vk-mem",
-]
-
-[[package]]
-name = "vkvideo"
-version = "0.1.0"
-dependencies = [
- "rustler",
- "vk-video",
 ]
 
 [[package]]
