@@ -2,8 +2,11 @@ use crate::encoder::{EncoderRateControl, EncoderTune};
 use crate::{EncodedFrame, Resource};
 use rustler::{Atom, Binary, Env, Error, NifStruct, OwnedBinary, ResourceArc};
 use std::sync::Mutex;
-use vk_video::parameters::{Rational, ScalingAlgorithm, TranscoderOutputConfig, VideoParameters};
-use vk_video::{EncodedInputChunk, EncodedOutputChunk, Transcoder};
+use gpu_video::parameters::{
+    AnyEncoderParameters, Rational, ScalingAlgorithm, TranscoderOutputParameters,
+    TranscoderParameters,
+};
+use gpu_video::{EncodedInputChunk, EncodedOutputChunk, Transcoder};
 
 rustler::atoms! {
   unknown_scaling_algorithm
@@ -33,7 +36,7 @@ pub fn new(
         .device()
         .ok_or_else(|| Error::RaiseTerm(Box::new("Resource is not a device")))?
         .device;
-    let transcoder_output_configs = output_specs
+    let output_parameters = output_specs
         .iter()
         .map(|spec| {
             let non_zero_width = std::num::NonZero::new(spec.width).ok_or(Error::RaiseTerm(
@@ -43,25 +46,12 @@ pub fn new(
                 Box::new("Improper height: height must be non-zero"),
             ))?;
 
-            let video_parameters = VideoParameters {
-                width: non_zero_width,
-                height: non_zero_height,
-                target_framerate: Rational {
-                    numerator: approx_framerate.0,
-                    denominator: std::num::NonZero::new(approx_framerate.1).ok_or(
-                        Error::RaiseTerm(Box::new(
-                            "Improper approx_framerate denominator: approx_framerate denominator must be non-zero",
-                        )),
-                    )?,
-                },
-            };
-
             let encoder_parameters = match spec.tune {
                 EncoderTune::LowLatency => device_resource
-                    .encoder_parameters_low_latency(video_parameters, spec.rate_control.into())
+                    .encoder_output_parameters_h264_low_latency(spec.rate_control.into())
                     .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?,
                 EncoderTune::HighQuality => device_resource
-                    .encoder_parameters_high_quality(video_parameters, spec.rate_control.into())
+                    .encoder_output_parameters_h264_high_quality(spec.rate_control.into())
                     .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?,
             };
 
@@ -82,15 +72,29 @@ pub fn new(
                 }
             };
 
-            Ok(TranscoderOutputConfig {
-                encoder_parameters,
+            Ok(TranscoderOutputParameters {
+                encoder_parameters: AnyEncoderParameters::H264(encoder_parameters),
+                output_width: non_zero_width,
+                output_height: non_zero_height,
                 scaling_algorithm,
             })
         })
         .collect::<Result<Vec<_>, _>>()?;
 
+    let transcoder_parameters = TranscoderParameters {
+        input_framerate: Rational {
+            numerator: approx_framerate.0,
+            denominator: std::num::NonZero::new(approx_framerate.1).ok_or(Error::RaiseTerm(
+                Box::new(
+                    "Improper approx_framerate denominator: approx_framerate denominator must be non-zero",
+                ),
+            ))?,
+        },
+        output_parameters,
+    };
+
     let transcoder = device_resource
-        .create_transcoder(&transcoder_output_configs)
+        .create_transcoder(transcoder_parameters)
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
     let transcoder_mutex = Mutex::new(Some(transcoder));
     let transcoder = TranscoderResource { transcoder_mutex };

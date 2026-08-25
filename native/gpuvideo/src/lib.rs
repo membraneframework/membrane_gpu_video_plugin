@@ -1,9 +1,9 @@
 use decoder::{DecoderResource, RawFrame};
 use encoder::{EncoderRateControl, EncoderResource, EncoderTune};
-use rustler::{Atom, Binary, Env, Error, ResourceArc, Term};
+use rustler::{Atom, Binary, Env, Error, ResourceArc};
 use std::sync::Arc;
 use transcoder::{OutputSpec, TranscoderResource};
-use vk_video::{
+use gpu_video::{
     parameters::{VulkanAdapterDescriptor, VulkanDeviceDescriptor},
     VulkanDevice,
 };
@@ -22,6 +22,9 @@ pub enum Resource {
     Transcoder(TranscoderResource),
     Device(DeviceResource),
 }
+
+#[rustler::resource_impl]
+impl rustler::Resource for Resource {}
 
 pub struct DeviceResource {
     pub device: Arc<VulkanDevice>,
@@ -66,14 +69,9 @@ pub struct EncodedFrame<'a> {
     pub pts_ns: Option<u64>,
 }
 
-#[allow(non_local_definitions)]
-fn load(env: Env, _: Term) -> bool {
-    rustler::resource!(Resource, env)
-}
-
 #[rustler::nif(schedule = "DirtyIo")]
 fn create_device() -> Result<ResourceArc<Resource>, Error> {
-    let instance = vk_video::VulkanInstance::new()
+    let instance = gpu_video::VulkanInstance::new()
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
 
     let adapter_descriptor = VulkanAdapterDescriptor {
@@ -84,7 +82,7 @@ fn create_device() -> Result<ResourceArc<Resource>, Error> {
         .create_adapter(&adapter_descriptor)
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
 
-    let device_descriptor = VulkanDeviceDescriptor {};
+    let device_descriptor = VulkanDeviceDescriptor::default();
     let device = adapter
         .create_device(&device_descriptor)
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
@@ -178,4 +176,4 @@ pub fn flush_transcoder<'a>(
     transcoder::flush(env, resource)
 }
 
-rustler::init!("Elixir.Membrane.GPUVideo.Native", load = load);
+rustler::init!("Elixir.Membrane.GPUVideo.Native");

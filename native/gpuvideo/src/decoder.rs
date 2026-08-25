@@ -1,7 +1,7 @@
 use crate::Resource;
 use rustler::{Binary, Env, Error, NifStruct, OwnedBinary, ResourceArc};
 use std::sync::Mutex;
-use vk_video::{parameters::DecoderParameters, BytesDecoder, EncodedInputChunk};
+use gpu_video::{parameters::DecoderParameters, BytesDecoder, EncodedInputChunk};
 
 pub struct DecoderResource {
     pub decoder_mutex: Mutex<BytesDecoder>,
@@ -21,7 +21,7 @@ pub fn new(_env: Env, resource: ResourceArc<Resource>) -> Result<ResourceArc<Res
         .device()
         .ok_or_else(|| Error::RaiseTerm(Box::new("Resource is not a device")))?
         .device
-        .create_bytes_decoder(DecoderParameters::default())
+        .create_bytes_decoder_h264(DecoderParameters::default())
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
     let decoder_mutex = Mutex::new(decoder);
     let decoder = DecoderResource { decoder_mutex };

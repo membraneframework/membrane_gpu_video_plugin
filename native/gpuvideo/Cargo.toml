@@ -8,5 +8,5 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-rustler = "0.37.0"
-vk-video = { git = "https://github.com/software-mansion/smelter.git", rev = "2f60dd3dd47fe583005eac2b0e393b5b5c8efd0b", features=["expose_parsers", "transcoder"], default-features=false}
+rustler = "0.38.0"
+gpu-video = { version = "0.4.0", features = ["expose-parsers", "transcoder"], default-features = false }
