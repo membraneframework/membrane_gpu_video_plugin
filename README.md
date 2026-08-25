@@ -14,7 +14,7 @@ The package can be installed by adding `membrane_gpu_video_plugin` to your list 
 ```elixir
 def deps do
   [
-    {:membrane_gpu_video_plugin, "~> 0.2.1"}
+    {:membrane_gpu_video_plugin, "~> 0.2.3"}
   ]
 end
 ```
