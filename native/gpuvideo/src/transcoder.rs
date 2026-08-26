@@ -16,6 +16,13 @@ pub struct TranscoderResource {
     pub transcoder_mutex: Mutex<Option<Transcoder>>,
 }
 
+// SAFETY: `Transcoder` is not auto-Send only because gpu-video's internal
+// `dyn Encoder` trait object lacks a `Send` bound; the concrete encoder types
+// behind it are the same as in `BytesEncoderH264`, which is Send. The Mutex
+// ensures exclusive access from one scheduler thread at a time.
+unsafe impl Send for TranscoderResource {}
+unsafe impl Sync for TranscoderResource {}
+
 #[derive(NifStruct, Clone, Copy)]
 #[module = "Membrane.GPUVideo.Transcoder.OutputSpec"]
 pub struct OutputSpec {

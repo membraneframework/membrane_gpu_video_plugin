@@ -1,6 +1,11 @@
 defmodule Membrane.GPUVideo.Native do
   @moduledoc false
-  use Rustler, otp_app: :membrane_gpu_video_plugin, crate: :gpuvideo
+  # gpu-video supports only platforms with Vulkan Video (Linux); skip compiling
+  # the NIF elsewhere so that docs, credo etc. can still run
+  use Rustler,
+    otp_app: :membrane_gpu_video_plugin,
+    crate: :gpuvideo,
+    skip_compilation?: :os.type() != {:unix, :linux}
 
   @type t :: reference()
   @type raw_frame :: %{
