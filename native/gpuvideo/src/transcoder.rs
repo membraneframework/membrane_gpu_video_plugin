@@ -1,12 +1,12 @@
 use crate::encoder::{EncoderRateControl, EncoderTune};
 use crate::{EncodedFrame, Resource};
-use rustler::{Atom, Binary, Env, Error, NifStruct, OwnedBinary, ResourceArc};
-use std::sync::Mutex;
 use gpu_video::parameters::{
     AnyEncoderParameters, Rational, ScalingAlgorithm, TranscoderOutputParameters,
     TranscoderParameters,
 };
 use gpu_video::{EncodedInputChunk, EncodedOutputChunk, Transcoder};
+use rustler::{Atom, Binary, Env, Error, NifStruct, OwnedBinary, ResourceArc};
+use std::sync::Mutex;
 
 rustler::atoms! {
   unknown_scaling_algorithm

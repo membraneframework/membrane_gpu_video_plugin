@@ -1,9 +1,9 @@
 use crate::{EncodedFrame, Resource};
+use gpu_video::parameters::{EncoderParametersH264, RateControl, Rational, VideoParameters};
+use gpu_video::{BytesEncoderH264, InputFrame, RawFrameData};
 use rustler::{Binary, Env, NifStruct, NifUnitEnum, OwnedBinary};
 use rustler::{Error, NifTaggedEnum, ResourceArc};
 use std::sync::Mutex;
-use gpu_video::parameters::{EncoderParametersH264, RateControl, Rational, VideoParameters};
-use gpu_video::{BytesEncoderH264, InputFrame, RawFrameData};
 
 pub struct EncoderResource {
     pub encoder_mutex: Mutex<Option<BytesEncoderH264>>,

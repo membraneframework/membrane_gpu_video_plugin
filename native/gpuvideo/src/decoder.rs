@@ -1,7 +1,7 @@
 use crate::Resource;
+use gpu_video::{parameters::DecoderParameters, BytesDecoder, EncodedInputChunk};
 use rustler::{Binary, Env, Error, NifStruct, OwnedBinary, ResourceArc};
 use std::sync::Mutex;
-use gpu_video::{parameters::DecoderParameters, BytesDecoder, EncodedInputChunk};
 
 pub struct DecoderResource {
     pub decoder_mutex: Mutex<BytesDecoder>,

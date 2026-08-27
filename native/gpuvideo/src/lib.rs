@@ -1,12 +1,12 @@
 use decoder::{DecoderResource, RawFrame};
 use encoder::{EncoderRateControl, EncoderResource, EncoderTune};
-use rustler::{Atom, Binary, Env, Error, ResourceArc};
-use std::sync::Arc;
-use transcoder::{OutputSpec, TranscoderResource};
 use gpu_video::{
     parameters::{VulkanAdapterDescriptor, VulkanDeviceDescriptor},
     VulkanDevice,
 };
+use rustler::{Atom, Binary, Env, Error, ResourceArc};
+use std::sync::Arc;
+use transcoder::{OutputSpec, TranscoderResource};
 
 rustler::atoms! {
   ok,
