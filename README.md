@@ -1,4 +1,4 @@
-# Membrane GPU video plugin
+# Membrane gpu_video plugin
 
 [![Hex.pm](https://img.shields.io/hexpm/v/membrane_gpu_video_plugin.svg)](https://hex.pm/packages/membrane_gpu_video_plugin)
 [![API Docs](https://img.shields.io/badge/api-docs-yellow.svg?style=flat)](https://hexdocs.pm/membrane_gpu_video_plugin)

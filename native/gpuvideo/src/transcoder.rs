@@ -1,27 +1,22 @@
 use crate::encoder::{EncoderRateControl, EncoderTune};
 use crate::{EncodedFrame, Resource};
 use gpu_video::parameters::{
-    AnyEncoderParameters, Rational, ScalingAlgorithm, TranscoderOutputParameters,
-    TranscoderParameters,
+    AnyEncoderParameters, Rational, TranscoderOutputParameters, TranscoderParameters,
 };
 use gpu_video::{EncodedInputChunk, EncodedOutputChunk, Transcoder};
-use rustler::{Atom, Binary, Env, Error, NifStruct, OwnedBinary, ResourceArc};
+use rustler::{Binary, Env, Error, NifStruct, NifUnitEnum, OwnedBinary, ResourceArc};
 use std::sync::Mutex;
 
-rustler::atoms! {
-  unknown_scaling_algorithm
-}
-
-pub struct TranscoderResource {
-    pub transcoder_mutex: Mutex<Option<Transcoder>>,
-}
+pub struct SendTranscoder(Transcoder);
 
 // SAFETY: `Transcoder` is not auto-Send only because gpu-video's internal
 // `dyn Encoder` trait object lacks a `Send` bound; the concrete encoder types
-// behind it are the same as in `BytesEncoderH264`, which is Send. The Mutex
-// ensures exclusive access from one scheduler thread at a time.
-unsafe impl Send for TranscoderResource {}
-unsafe impl Sync for TranscoderResource {}
+// behind it are the same as in `BytesEncoderH264`, which is Send.
+unsafe impl Send for SendTranscoder {}
+
+pub struct TranscoderResource {
+    pub transcoder_mutex: Mutex<Option<SendTranscoder>>,
+}
 
 #[derive(NifStruct, Clone, Copy)]
 #[module = "Membrane.GPUVideo.Transcoder.OutputSpec"]
@@ -30,11 +25,28 @@ pub struct OutputSpec {
     pub height: u32,
     pub tune: EncoderTune,
     pub rate_control: EncoderRateControl,
-    pub scaling_algorithm: Atom,
+    pub scaling_algorithm: ScalingAlgorithm,
+}
+
+#[derive(NifUnitEnum, Clone, Copy)]
+pub enum ScalingAlgorithm {
+    NearestNeighbor,
+    Lanczos3,
+    Bilinear,
+}
+
+impl From<ScalingAlgorithm> for gpu_video::parameters::ScalingAlgorithm {
+    fn from(algorithm: ScalingAlgorithm) -> Self {
+        match algorithm {
+            ScalingAlgorithm::NearestNeighbor => Self::NearestNeighbor,
+            ScalingAlgorithm::Lanczos3 => Self::Lanczos3,
+            ScalingAlgorithm::Bilinear => Self::Bilinear,
+        }
+    }
 }
 
 pub fn new(
-    env: Env,
+    _env: Env,
     resource: ResourceArc<Resource>,
     output_specs: Vec<OutputSpec>,
     approx_framerate: (u32, u32),
@@ -55,35 +67,17 @@ pub fn new(
 
             let encoder_parameters = match spec.tune {
                 EncoderTune::LowLatency => device_resource
-                    .encoder_output_parameters_h264_low_latency(spec.rate_control.into())
-                    .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?,
+                    .encoder_output_parameters_h264_low_latency(spec.rate_control.into()),
                 EncoderTune::HighQuality => device_resource
-                    .encoder_output_parameters_h264_high_quality(spec.rate_control.into())
-                    .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?,
-            };
-
-            let scaling_algorithm = match spec
-                .scaling_algorithm
-                .to_term(env)
-                .atom_to_string()?
-                .as_str()
-            {
-                "nearest_neighbor" => ScalingAlgorithm::NearestNeighbor,
-                "lanczos3" => ScalingAlgorithm::Lanczos3,
-                "bilinear" => ScalingAlgorithm::Bilinear,
-                _ => {
-                    return Err(Error::RaiseTerm(Box::new((
-                        unknown_scaling_algorithm(),
-                        spec.scaling_algorithm,
-                    ))))
-                }
-            };
+                    .encoder_output_parameters_h264_high_quality(spec.rate_control.into()),
+            }
+            .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
 
             Ok(TranscoderOutputParameters {
                 encoder_parameters: AnyEncoderParameters::H264(encoder_parameters),
                 output_width: non_zero_width,
                 output_height: non_zero_height,
-                scaling_algorithm,
+                scaling_algorithm: spec.scaling_algorithm.into(),
             })
         })
         .collect::<Result<Vec<_>, _>>()?;
@@ -103,7 +97,7 @@ pub fn new(
     let transcoder = device_resource
         .create_transcoder(transcoder_parameters)
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
-    let transcoder_mutex = Mutex::new(Some(transcoder));
+    let transcoder_mutex = Mutex::new(Some(SendTranscoder(transcoder)));
     let transcoder = TranscoderResource { transcoder_mutex };
 
     let resource = ResourceArc::new(Resource::Transcoder(transcoder));
@@ -123,9 +117,12 @@ pub fn transcode<'a>(
         .transcoder_mutex
         .lock()
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
-    let transcoder: &mut Transcoder = guard.as_mut().ok_or(Error::RaiseTerm(Box::new(
-        "Transcoder resource is not initialized",
-    )))?;
+    let transcoder: &mut Transcoder = &mut guard
+        .as_mut()
+        .ok_or(Error::RaiseTerm(Box::new(
+            "Transcoder resource is not initialized",
+        )))?
+        .0;
 
     let encoded_input_chunk = EncodedInputChunk {
         data: bytes.as_slice(),
@@ -152,9 +149,12 @@ pub fn flush<'a>(
         .transcoder_mutex
         .lock()
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
-    let transcoder: &mut Transcoder = guard.as_mut().ok_or(Error::RaiseTerm(Box::new(
-        "Transcoder resource is not initialized",
-    )))?;
+    let transcoder: &mut Transcoder = &mut guard
+        .as_mut()
+        .ok_or(Error::RaiseTerm(Box::new(
+            "Transcoder resource is not initialized",
+        )))?
+        .0;
 
     let encoded_output_chunks = transcoder
         .flush()
@@ -176,7 +176,12 @@ fn process_outputs_chunks<'a>(
                 .into_iter()
                 .map(|chunk| EncodedFrame {
                     pts_ns: chunk.pts,
-                    payload: OwnedBinary::from_iter(chunk.data).release(env),
+                    payload: {
+                        let mut binary = OwnedBinary::new(chunk.data.len())
+                            .expect("failed to allocate output binary");
+                        binary.as_mut_slice().copy_from_slice(&chunk.data);
+                        binary.release(env)
+                    },
                 })
                 .collect()
         })

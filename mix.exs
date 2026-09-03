@@ -19,7 +19,7 @@ defmodule Membrane.GPUVideo.Mixfile do
       package: package(),
 
       # docs
-      name: "Membrane GPU video plugin",
+      name: "Membrane gpu_video plugin",
       source_url: @github_url,
       docs: docs(),
       homepage_url: "https://membrane.stream",

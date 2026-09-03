@@ -1,16 +1,12 @@
 use decoder::{DecoderResource, RawFrame};
 use encoder::{EncoderRateControl, EncoderResource, EncoderTune};
 use gpu_video::{
-    parameters::{VulkanAdapterDescriptor, VulkanDeviceDescriptor},
     VulkanDevice,
+    parameters::{VulkanAdapterDescriptor, VulkanDeviceDescriptor},
 };
-use rustler::{Atom, Binary, Env, Error, ResourceArc};
+use rustler::{Atom, Binary, Env, Error, ResourceArc, types::atom};
 use std::sync::Arc;
 use transcoder::{OutputSpec, TranscoderResource};
-
-rustler::atoms! {
-  ok,
-}
 
 pub mod decoder;
 pub mod encoder;
@@ -145,7 +141,7 @@ fn destroy<'a>(env: Env<'a>, resource: ResourceArc<Resource>) -> Result<Atom, Er
         *encoder = None;
     }
 
-    Ok(ok())
+    Ok(atom::ok())
 }
 
 #[rustler::nif(schedule = "DirtyIo")]
