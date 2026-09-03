@@ -133,9 +133,7 @@ pub fn transcode<'a>(
         .transcode(encoded_input_chunk)
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
 
-    let results = process_outputs_chunks(env, encoded_output_chunks);
-
-    Ok(results)
+    process_outputs_chunks(env, encoded_output_chunks)
 }
 
 pub fn flush<'a>(
@@ -160,30 +158,32 @@ pub fn flush<'a>(
         .flush()
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
 
-    let results = process_outputs_chunks(env, encoded_output_chunks);
-
-    Ok(results)
+    process_outputs_chunks(env, encoded_output_chunks)
 }
 
 fn process_outputs_chunks<'a>(
     env: Env<'a>,
     encoded_outputs_chunks: Vec<Vec<EncodedOutputChunk<Vec<u8>>>>,
-) -> Vec<Vec<EncodedFrame<'a>>> {
+) -> Result<Vec<Vec<EncodedFrame<'a>>>, Error> {
     encoded_outputs_chunks
         .into_iter()
         .map(|chunks| {
             chunks
                 .into_iter()
-                .map(|chunk| EncodedFrame {
-                    pts_ns: chunk.pts,
-                    payload: {
-                        let mut binary = OwnedBinary::new(chunk.data.len())
-                            .expect("failed to allocate output binary");
-                        binary.as_mut_slice().copy_from_slice(&chunk.data);
-                        binary.release(env)
-                    },
+                .map(|chunk| {
+                    Ok(EncodedFrame {
+                        pts_ns: chunk.pts,
+                        payload: to_binary(env, &chunk.data)?,
+                    })
                 })
                 .collect()
         })
         .collect()
+}
+
+fn to_binary<'a>(env: Env<'a>, data: &[u8]) -> Result<Binary<'a>, Error> {
+    let mut binary = OwnedBinary::new(data.len())
+        .ok_or(Error::RaiseTerm(Box::new("Couldn't create OwnedBinary")))?;
+    binary.as_mut_slice().copy_from_slice(data);
+    Ok(binary.release(env))
 }
