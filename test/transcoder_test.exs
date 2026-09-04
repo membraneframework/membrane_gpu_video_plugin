@@ -3,8 +3,8 @@ defmodule Transcoder.Test do
   import Membrane.ChildrenSpec
   import Membrane.Testing.Assertions
   require Membrane.Pad, as: Pad
+  alias Membrane.GPUVideo.Transcoder
   alias Membrane.Testing.{Pipeline, Sink}
-  alias Membrane.VKVideo.Transcoder
 
   @take_refs_snapshot System.get_env("TAKE_TEST_REFERENCES_SNAPSHOT", "") != ""
 

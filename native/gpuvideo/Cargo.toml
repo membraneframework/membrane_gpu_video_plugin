@@ -1,0 +1,12 @@
+[package]
+name = "gpuvideo"
+version = "0.1.0"
+authors = []
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+rustler = "0.38.0"
+gpu-video = { version = "0.4.0", features = ["expose-parsers", "transcoder"], default-features = false }

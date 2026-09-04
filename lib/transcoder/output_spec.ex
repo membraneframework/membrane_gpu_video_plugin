@@ -1,7 +1,7 @@
-defmodule Membrane.VKVideo.Transcoder.OutputSpec do
+defmodule Membrane.GPUVideo.Transcoder.OutputSpec do
   @moduledoc false
 
-  alias Membrane.VKVideo.Encoder
+  alias Membrane.GPUVideo.Encoder
 
   @type t :: %__MODULE__{
           width: non_neg_integer(),

@@ -1,12 +1,12 @@
 use crate::{EncodedFrame, Resource};
+use gpu_video::parameters::{EncoderParametersH264, RateControl, Rational, VideoParameters};
+use gpu_video::{BytesEncoderH264, InputFrame, RawFrameData};
 use rustler::{Binary, Env, NifStruct, NifUnitEnum, OwnedBinary};
 use rustler::{Error, NifTaggedEnum, ResourceArc};
 use std::sync::Mutex;
-use vk_video::parameters::{RateControl, Rational, VideoParameters};
-use vk_video::{BytesEncoder, InputFrame, RawFrameData};
 
 pub struct EncoderResource {
-    pub encoder_mutex: Mutex<Option<BytesEncoder>>,
+    pub encoder_mutex: Mutex<Option<BytesEncoderH264>>,
     pub width: u32,
     pub height: u32,
 }
@@ -18,7 +18,7 @@ pub enum EncoderTune {
 }
 
 #[derive(NifStruct, Clone, Copy)]
-#[module = "Membrane.VKVideo.Encoder.VariableBitrate"]
+#[module = "Membrane.GPUVideo.Encoder.VariableBitrate"]
 pub struct VariableBitrate {
     pub average_bitrate: u64,
     pub max_bitrate: u64,
@@ -26,7 +26,7 @@ pub struct VariableBitrate {
 }
 
 #[derive(NifStruct, Clone, Copy)]
-#[module = "Membrane.VKVideo.Encoder.ConstantBitrate"]
+#[module = "Membrane.GPUVideo.Encoder.ConstantBitrate"]
 pub struct ConstantBitrate {
     pub bitrate: u64,
     pub virtual_buffer_size_ms: u64,
@@ -94,17 +94,20 @@ pub fn new(
         },
     };
 
-    let parameters = match tune {
+    let output_parameters = match tune {
         EncoderTune::LowLatency => device_resource
-            .encoder_parameters_low_latency(video_parameters, rate_control.into())
+            .encoder_output_parameters_h264_low_latency(rate_control.into())
             .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?,
         EncoderTune::HighQuality => device_resource
-            .encoder_parameters_high_quality(video_parameters, rate_control.into())
+            .encoder_output_parameters_h264_high_quality(rate_control.into())
             .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?,
     };
 
     let encoder = device_resource
-        .create_bytes_encoder(parameters)
+        .create_bytes_encoder_h264(EncoderParametersH264 {
+            input_parameters: video_parameters,
+            output_parameters,
+        })
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
     let encoder_mutex = Mutex::new(Some(encoder));
     let encoder = EncoderResource {
@@ -140,7 +143,7 @@ pub fn encode<'a>(
         .lock()
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
 
-    let encoder: &mut BytesEncoder = guard
+    let encoder: &mut BytesEncoderH264 = guard
         .as_mut()
         .ok_or(Error::RaiseTerm(Box::new("Encoder is not initialized")))?;
 

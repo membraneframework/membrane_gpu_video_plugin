@@ -1,4 +1,4 @@
-defmodule Membrane.VKVideo.Encoder.ConstantBitrate do
+defmodule Membrane.GPUVideo.Encoder.ConstantBitrate do
   @moduledoc """
   Defines encoder setting for constant bitrate rate control algorithm.
   The following fields need to be specified:

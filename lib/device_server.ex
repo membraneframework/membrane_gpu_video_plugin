@@ -1,7 +1,7 @@
-defmodule Membrane.VKVideo.DeviceServer do
+defmodule Membrane.GPUVideo.DeviceServer do
   @moduledoc false
   use GenServer
-  alias Membrane.VKVideo.Native
+  alias Membrane.GPUVideo.Native
 
   @impl true
   def init(_opts) do

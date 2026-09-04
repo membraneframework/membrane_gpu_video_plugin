@@ -1,12 +1,12 @@
-defmodule Membrane.VKVideo.Mixfile do
+defmodule Membrane.GPUVideo.Mixfile do
   use Mix.Project
 
-  @version "0.2.2"
-  @github_url "https://github.com/membraneframework/membrane_vk_video_plugin"
+  @version "0.2.3"
+  @github_url "https://github.com/membraneframework/membrane_gpu_video_plugin"
 
   def project do
     [
-      app: :membrane_vk_video_plugin,
+      app: :membrane_gpu_video_plugin,
       version: @version,
       elixir: "~> 1.13",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -15,11 +15,11 @@ defmodule Membrane.VKVideo.Mixfile do
       dialyzer: dialyzer(),
 
       # hex
-      description: "vk video plugin for Membrane Framework",
+      description: "GPU video plugin for Membrane Framework",
       package: package(),
 
       # docs
-      name: "Membrane vk video plugin",
+      name: "Membrane gpu_video plugin",
       source_url: @github_url,
       docs: docs(),
       homepage_url: "https://membrane.stream",
@@ -30,7 +30,7 @@ defmodule Membrane.VKVideo.Mixfile do
   def application do
     [
       extra_applications: [],
-      mod: {Membrane.VKVideo, []}
+      mod: {Membrane.GPUVideo, []}
     ]
   end
 
@@ -44,7 +44,7 @@ defmodule Membrane.VKVideo.Mixfile do
       {:membrane_raw_video_format, "~> 0.4.2"},
       {:membrane_h26x_plugin, "~> 0.10.5", only: :test},
       {:membrane_file_plugin, "~> 0.17.2", only: :test},
-      {:rustler, "~> 0.37.1"},
+      {:rustler, "~> 0.38.0"},
       {:ex_doc, ">= 0.40.0", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: :dev, runtime: false}
@@ -81,7 +81,7 @@ defmodule Membrane.VKVideo.Mixfile do
       main: "readme",
       extras: ["README.md", "LICENSE"],
       source_ref: "v#{@version}",
-      nest_modules_by_prefix: [Membrane.VKVideo]
+      nest_modules_by_prefix: [Membrane.GPUVideo]
     ]
   end
 

@@ -75,7 +75,7 @@ defmodule Encoder.Test do
               height: @height,
               framerate: {@framerate_numerator, 1}
             })
-            |> child(:encoder, %Membrane.VKVideo.Encoder{
+            |> child(:encoder, %Membrane.GPUVideo.Encoder{
               approx_framerate: {@framerate_numerator, 1}
             })
             |> child(:sink, Sink)
@@ -116,7 +116,7 @@ defmodule Encoder.Test do
               width: @width,
               height: @height
             })
-            |> child(:encoder, %Membrane.VKVideo.Encoder{
+            |> child(:encoder, %Membrane.GPUVideo.Encoder{
               approx_framerate: {@framerate_numerator, 1}
             })
             |> child(:sink, %Membrane.File.Sink{location: out_path})
@@ -148,7 +148,7 @@ defmodule Encoder.Test do
               height: @height,
               framerate: {@framerate_numerator, 1}
             })
-            |> child(:encoder, Membrane.VKVideo.Encoder)
+            |> child(:encoder, Membrane.GPUVideo.Encoder)
             |> child(:sink, %Membrane.File.Sink{location: out_path})
         )
 
