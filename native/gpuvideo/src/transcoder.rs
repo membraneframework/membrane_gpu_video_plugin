@@ -117,7 +117,7 @@ pub fn transcode<'a>(
         .transcoder_mutex
         .lock()
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
-    let transcoder: &mut Transcoder = &mut guard
+    let transcoder = &mut guard
         .as_mut()
         .ok_or(Error::RaiseTerm(Box::new(
             "Transcoder resource is not initialized",
@@ -147,7 +147,7 @@ pub fn flush<'a>(
         .transcoder_mutex
         .lock()
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
-    let transcoder: &mut Transcoder = &mut guard
+    let transcoder = &mut guard
         .as_mut()
         .ok_or(Error::RaiseTerm(Box::new(
             "Transcoder resource is not initialized",
