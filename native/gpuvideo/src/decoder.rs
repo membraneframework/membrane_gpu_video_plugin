@@ -1,11 +1,18 @@
 use crate::Resource;
-use gpu_video::{BytesDecoder, EncodedInputChunk, parameters::DecoderParameters};
-use rustler::{Binary, Env, Error, NifStruct, OwnedBinary, ResourceArc};
+use gpu_video::{
+    BytesDecoder, EncodedInputChunk, OutputFrame, RawFrameData, parameters::DecoderParameters,
+};
+use rustler::{Binary, Env, Error, NifStruct, ResourceArc};
 use std::sync::Mutex;
 
 pub struct DecoderResource {
     pub decoder_mutex: Mutex<BytesDecoder>,
 }
+
+pub struct RawFramePayload(Vec<u8>);
+
+#[rustler::resource_impl]
+impl rustler::Resource for RawFramePayload {}
 
 #[derive(NifStruct)]
 #[module = "Membrane.GPUVideo.RawFrame"]
@@ -49,21 +56,10 @@ pub fn decode<'a>(
     let decoded_frames = decoder
         .decode(encoded_input_chunk)
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
-    let mut results = Vec::new();
-    for frame in decoded_frames {
-        let len = frame.data.frame.len();
-        let mut payload = OwnedBinary::new(len)
-            .ok_or(Error::RaiseTerm(Box::new("Couldn't create OwnedBinary")))?;
-        payload.as_mut_slice().copy_from_slice(&frame.data.frame);
-
-        results.push(RawFrame {
-            payload: payload.release(env),
-            pts_ns: frame.metadata.pts,
-            width: frame.data.width,
-            height: frame.data.height,
-        });
-    }
-    Ok(results)
+    Ok(decoded_frames
+        .into_iter()
+        .map(|frame| into_raw_frame(env, frame))
+        .collect())
 }
 
 pub fn flush(env: Env, resource: ResourceArc<Resource>) -> Result<Vec<RawFrame>, Error> {
@@ -78,19 +74,18 @@ pub fn flush(env: Env, resource: ResourceArc<Resource>) -> Result<Vec<RawFrame>,
         .flush()
         .map_err(|err| Error::RaiseTerm(Box::new(err.to_string())))?;
 
-    let mut results = Vec::new();
-    for frame in flushed_frames {
-        let len = frame.data.frame.len();
-        let mut payload = OwnedBinary::new(len)
-            .ok_or(Error::RaiseTerm(Box::new("Couldn't create OwnedBinary")))?;
-        payload.as_mut_slice().copy_from_slice(&frame.data.frame);
+    Ok(flushed_frames
+        .into_iter()
+        .map(|frame| into_raw_frame(env, frame))
+        .collect())
+}
 
-        results.push(RawFrame {
-            payload: payload.release(env),
-            pts_ns: frame.metadata.pts,
-            width: frame.data.width,
-            height: frame.data.height,
-        });
+fn into_raw_frame(env: Env, frame: OutputFrame<RawFrameData>) -> RawFrame {
+    let payload_resource = ResourceArc::new(RawFramePayload(frame.data.frame));
+    RawFrame {
+        payload: payload_resource.make_binary(env, |payload| payload.0.as_slice()),
+        pts_ns: frame.metadata.pts,
+        width: frame.data.width,
+        height: frame.data.height,
     }
-    Ok(results)
 }
